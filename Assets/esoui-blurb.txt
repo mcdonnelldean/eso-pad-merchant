@@ -1,1 +1,23 @@
-To Follow
+Get MasterMerchant data while in Gamepad Mode! Simply install MasterMerchant and PadMerchant while using Gamepad Mode. Adds historical data to tooltips and improves Browse Results and Listing panels of the Guild Store.
+
+[SIZE="4"]Features[/SIZE]
+[LIST]
+[*] Stops MasterMerchant from erroring on load when in gamepad mode
+[*] Adds per unit price to Trade Store Browse Results & Own Listings panels
+[*] Adds support for MasterMerchant data in the following on Tooltips, Browse Results & Own Listings
+[/LIST]
+
+[SIZE="4"]Known Issues[/SIZE]
+[LIST]
+[*] Formating of per unit price could be improved
+[*] Formating of price spread could be improved
+[/LIST]
+
+See Screenshots for updated screens and tooltips.
+
+[LIST]
+[*][URL="https://github.com/mcdonnelldean/eso-pad-merchant"]Get the Code[/URL]
+[*][URL="https://github.com/mcdonnelldean/eso-pad-merchant/issues/"]Submit a bug[/URL]
+[/LIST]
+
+Ingame donations of items, gold, or even junk are gladly accepted :D (@mcdonnelldean on EU)

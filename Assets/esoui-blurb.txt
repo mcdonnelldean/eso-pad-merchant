@@ -7,12 +7,6 @@ Get MasterMerchant data while in Gamepad Mode! Simply install MasterMerchant and
 [*] Adds support for MasterMerchant data in the following on Tooltips, Browse Results & Own Listings
 [/LIST]
 
-[SIZE="4"]Known Issues[/SIZE]
-[LIST]
-[*] Formating of per unit price could be improved
-[*] Formating of price spread could be improved
-[/LIST]
-
 See Screenshots for updated screens and tooltips.
 
 [LIST]
@@ -21,3 +15,21 @@ See Screenshots for updated screens and tooltips.
 [/LIST]
 
 Ingame donations of items, gold, or even junk are gladly accepted :D (@mcdonnelldean on EU)
+
+[SIZE="4"]Known Issues[/SIZE]
+[LIST]
+[*] Formating of per unit price could be improved
+[*] Formating of price spread could be improved
+[/LIST]
+
+[SIZE="4"]Changelog[/SIZE]
+
+[SIZE="3"]V1.1[/SIZE]
+[LIST]
+[*]Fix for missing equipped item tooltip window when in main menu
+[/LIST]
+
+[SIZE="3"]V1.0[/SIZE]
+[LIST]
+[*]Initial Release
+[/LIST]

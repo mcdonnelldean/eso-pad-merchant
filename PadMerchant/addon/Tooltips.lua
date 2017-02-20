@@ -56,11 +56,13 @@ local function IntegrateWith(tooltip)
 	local method = "LayoutItem"
 	local original = tooltip[method]
 	
-	-- The wrapper will call the old method first, we 
-	-- will add our data at the bottom of the list.
+	-- The wrapper will call the old method first, we will add our data at the bottom of 
+	-- the list. The original method returns a context that needs to be returned by the 
+	-- wrapper. If this is not returned 'equipped' windows will break see (#3).
 	local function Wrapper(self, itemLink, ...)
-		original(self, itemLink, ...)
+		local context = original(self, itemLink, ...)
 		AddData(self, itemLink)
+		return context
 	end
 
 	tooltip[method] = Wrapper
@@ -84,7 +86,7 @@ end
 --[[ Globals Used & Explainations:
 
 MasterMerchant
-  Data is read via MasterMerchant which exports a global (just like we do). We 
+  	Data is read via MasterMerchant which exports a global (just like we do). We 
 	have MasterMerchant set as an explict dependency in PadMerchant.txt so we can 
 	be assured it is available to use as a global.
 

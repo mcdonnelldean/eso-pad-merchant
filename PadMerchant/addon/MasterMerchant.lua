@@ -15,7 +15,7 @@ end
 -- Gamepad mode crashes due to PC mode specific functionality.
 function PadMerchant.MasterMerchant.Setup()
 		-- A table of the original MM methods we will override
-		local original {
+		local original = {
 			initBuyingAdvice = MasterMerchant.initBuyingAdvice,
   		initSellingAdvice = MasterMerchant.initSellingAdvice,
   		AddBuyingAdvice = MasterMerchant.AddBuyingAdvice,

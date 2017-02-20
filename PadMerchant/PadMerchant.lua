@@ -4,7 +4,7 @@
 -- a single global 'namespace' table instead of many misc globals variables.
 PadMerchant = {
 	name = "PadMerchant",
-	version = "1.0",
+	version = "1.1",
 	TradeHouse = {},
 	ToolTips = {},
 	MasterMerchant = {},

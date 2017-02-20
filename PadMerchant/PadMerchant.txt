@@ -2,7 +2,7 @@
 ## Description: MasterMerchant integration for GamepadUI
 ## APIVersion: 100018
 ## Author: mcdonnelldean
-## Version: 1.0
+## Version: 1.1
 ## DependsOn: MasterMerchant
 ## OptionalDependsOn: LibAddonMenu-2.0
 

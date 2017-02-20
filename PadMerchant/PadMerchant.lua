@@ -4,7 +4,7 @@
 -- a single global 'namespace' table instead of many misc globals variables.
 PadMerchant = {
 	name = "PadMerchant",
-	version = "1.1",
+	version = "1.2",
 	TradeHouse = {},
 	ToolTips = {},
 	MasterMerchant = {},
@@ -21,14 +21,10 @@ local function Initialize(event, addon)
 	if addon ~= PadMerchant.name then return end
 	GetEventManager():UnregisterForEvent(PadMerchant.name, EVENT_ADD_ON_LOADED)
 
-	-- Core of the addon only activates in Gamepad Preferred Mode to allow
-	-- MasterMerchant to be used in PC mode by swapping modes and reloading
-	-- the UI. (Some people play with gampad ui and shop with pc ui).
-	if(IsInGamepadPreferredMode()) then
-		PadMerchant.MasterMerchant.Setup()
-		PadMerchant.TradeHouse.Setup()
-		PadMerchant.ToolTips.Setup()
-	end
+	-- Set up each of our integrations.
+	PadMerchant.MasterMerchant.Setup()
+	PadMerchant.TradeHouse.Setup()
+	PadMerchant.ToolTips.Setup()
 
 	-- Setup the options regardless of mode as we
 	-- always want the settings window available.

@@ -1,10 +1,11 @@
 Get MasterMerchant data while in Gamepad Mode! Simply install MasterMerchant and PadMerchant while using Gamepad Mode. Adds historical data to tooltips and improves Browse Results and Listing panels of the Guild Store.
 
-[SIZE="4"]Features[/SIZE]
+[SIZE="3"]Features[/SIZE]
 [LIST]
 [*] Stops MasterMerchant from erroring on load when in gamepad mode
 [*] Adds per unit price to Trade Store Browse Results & Own Listings panels
 [*] Adds support for MasterMerchant data in the following on Tooltips, Browse Results & Own Listings
+[*] Supports mode hot swapping. Use AGS and MM while in PC mode and switch to Gamepad mode when not selling!
 [/LIST]
 
 See Screenshots for updated screens and tooltips.
@@ -16,20 +17,19 @@ See Screenshots for updated screens and tooltips.
 
 Ingame donations of items, gold, or even junk are gladly accepted :D (@mcdonnelldean on EU)
 
-[SIZE="4"]Known Issues[/SIZE]
+[SIZE="3"]Changelog[/SIZE]
+
+[SIZE="2"]V1.2[/SIZE]
 [LIST]
-[*] Formating of per unit price could be improved
-[*] Formating of price spread could be improved
+[*] Enabled Hot Swapping of modes. The connection to MasterMerchant now disables when switching from gampad to pc mode.
 [/LIST]
 
-[SIZE="4"]Changelog[/SIZE]
-
-[SIZE="3"]V1.1[/SIZE]
+[SIZE="2"]V1.1[/SIZE]
 [LIST]
-[*]Fix for missing equipped item tooltip window when in main menu
+[*]Fix for missing equipped item tooltip window when in main menu.
 [/LIST]
 
 [SIZE="3"]V1.0[/SIZE]
 [LIST]
-[*]Initial Release
+[*]Initial Release.
 [/LIST]

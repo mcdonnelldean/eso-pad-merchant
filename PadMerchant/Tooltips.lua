@@ -1,61 +1,87 @@
 
--- Generates the tip content by reading and munching the itemPriceTip from MasterMerchant. Handles 
--- items that are not yet seen (MM returns them as nil). Returns a printable string, never nil.
-local function GenerateTipContent(itemLink)
-	local tip = MasterMerchant:itemPriceTip(itemLink, true, clickable)
+GOLD_ICON = "|t32:32:esoui/art/currency/gamepad/gp_gold.dds|t"
 
-	-- This probably should be cleaned up. Until I 
-	-- get to play with regex in lua, it will do.
-	if(tip ~= nil) then
-		tip = string.sub(tip, 11)
-		tip = string.gsub(tip, "%):", "(")
-		tip = string.gsub(tip, "items,", "items) in ")
-		tip = string.gsub(tip, "/", "(")
-		tip = string.gsub(tip, "sales,", "sales in")
-		tip = string.gsub(tip, "sale,", "sale in")
-		tip = string.gsub(tip, "sales%(", "sales (")
-		tip = string.gsub(tip, "sale%(", "sale (")
-		tip = string.gsub(tip, "days%( ", "days (")
-		tip = string.gsub(tip, "day%( ", "day (")
-		tip = tip .. " |t16:16:esoui/art/currency/gamepad/gp_gold.dds|t" .. " avg)"
-		return tip
+
+local function GenerateTipContent(itemLink)
+	local itemInfo = TamrielTradeCentre_ItemInfo:New(itemLink)
+	local pricing = TamrielTradeCentrePrice:GetPriceInfo(itemInfo)
+
+	d(itemInfo)
+
+	if pricing == nil then
+		pricing = {}
 	end
 
-	-- nill means now data known yet, so we parse 
-	-- that into a readable message for the user.
-	return "Not yet seen"
+	local suggested = "No Suggestion Available"
+	if pricing.SuggestedPrice ~= nil then
+		local suggestedMin = TamrielTradeCentre:FormatNumber(pricing.SuggestedPrice, 0) .. GOLD_ICON
+		local suggestedMax = TamrielTradeCentre:FormatNumber(pricing.SuggestedPrice * 1.25, 0) .. GOLD_ICON
+
+		suggested = suggestedMin .. " to " .. suggestedMax
+	end
+
+	local range = ""
+	if pricing.Avg ~= nil then
+		local priceMin = TamrielTradeCentre:FormatNumber(pricing.Min, 0) .. GOLD_ICON
+		local priceMax = TamrielTradeCentre:FormatNumber(pricing.Max, 0) .. GOLD_ICON
+		local priceAvg = TamrielTradeCentre:FormatNumber(pricing.Avg, 0) .. GOLD_ICON
+
+		range = "Listings from " .. priceMin .. " to " .. priceMax
+		
+		pricing.Min = priceMin
+		pricing.Avg = priceAvg
+		pricing.Max = priceMax
+	end
+
+	local frequency = "No historical data available"
+	if pricing.EntryCount ~= nil then
+		local listings = TamrielTradeCentre:FormatNumber(pricing.EntryCount, 0)
+
+		frequency = listings .. " listings, averaging " .. pricing.Avg .. "."
+
+	end
+
+	pricing.Suggested = suggested
+	pricing.Range = range
+	pricing.Frequency = frequency
+
+	return pricing
 end
 
 -- Adds sales data from MasterMerchant data about to the provided
-local function AddData(tooltip, itemLink)	
+local function AddData(tooltip, itemLink)
 	if itemLink == nil then return end
 
 	-- Our style is common to both header and tip
 	local style = tooltip:GetStyle("bodySection")
 
 	-- Generate our header and params
-	local headerContent = "HISTORICAL PRICING"
 	local headerParams = {
-		fontSize = 28, 
-		fontColorField = GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_1
-	}
-	
-	-- Generate our tip content and params
-	local tipContent = GenerateTipContent(itemLink)
-	local tipParams = { 
-		fontSize = 26
+		fontSize = 32
 	}
 
-	-- Add the header and the tip to the end of the tooltip.
-	tooltip:AddLine(headerContent, headerParams, style)
-	tooltip:AddLine(tipContent, tipParams, style)
+	-- Generate our tip content and params
+	local tipContent = GenerateTipContent(itemLink)
+	local tipParams = {
+		fontSize = 42,
+		fontColorField = GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_1
+	}
+
+	local FreqParams = {
+		fontSize = 36
+	}
+
+	tooltip:AddLine("SUGGESTED PRICING, PER UNIT", headerParams, style)
+	tooltip:AddLine(tipContent.Suggested, tipParams, style)
+	tooltip:AddLine(tipContent.Frequency, FreqParams, style)
+	tooltip:AddLine(tipContent.Range, FreqParams, style)
 end
 
 -- Integrates with the given tooltip panel.
 local function IntegrateWith(tooltip)
 	local method = "LayoutItem"
 	local original = tooltip[method]
-	
+
 	-- The wrapper will call the old method first, we will add our data at the bottom of 
 	-- the list. The original method returns a context that needs to be returned by the 
 	-- wrapper. If this is not returned 'equipped' windows will break see (#3).
@@ -84,11 +110,6 @@ function PadMerchant.ToolTips.Setup()
 end
 
 --[[ Globals Used & Explainations:
-
-MasterMerchant
-  	Data is read via MasterMerchant which exports a global (just like we do). We 
-	have MasterMerchant set as an explict dependency in PadMerchant.txt so we can 
-	be assured it is available to use as a global.
 
 GAMEPAD_TOOLTIPS:GetTooltip(GAMEPAD_XYZ_TOOLTIP)
 	In gamepad mode the windows to the left and right are considered tooltips to

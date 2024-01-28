@@ -4,11 +4,8 @@
 -- a single global 'namespace' table instead of many misc globals variables.
 PadMerchant = {
 	name = "PadMerchant",
-	version = "1.2",
-	TradeHouse = {},
-	ToolTips = {},
-	MasterMerchant = {},
-	Options = {}
+	version = "2.0",
+	ToolTips = {}
 }
 
 -- Our addons Initialize event. This will be 
@@ -22,13 +19,7 @@ local function Initialize(event, addon)
 	GetEventManager():UnregisterForEvent(PadMerchant.name, EVENT_ADD_ON_LOADED)
 
 	-- Set up each of our integrations.
-	PadMerchant.MasterMerchant.Setup()
-	PadMerchant.TradeHouse.Setup()
 	PadMerchant.ToolTips.Setup()
-
-	-- Setup the options regardless of mode as we
-	-- always want the settings window available.
-	PadMerchant.Options.Setup()
 end
 
 -- Register our Initialize method to the EVENT_ADD_ON_LOADED event. This event is fired by 

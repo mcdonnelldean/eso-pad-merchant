@@ -1,12 +1,15 @@
 
 GOLD_ICON = "|t32:32:esoui/art/currency/gamepad/gp_gold.dds|t"
 
+local GENERAL_COLOR_WHITE = GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_1
+local GENERAL_COLOR_GREY = GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_2
+local GENERAL_COLOR_OFF_WHITE = GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_3
+
 
 local function GenerateTipContent(itemLink)
 	local itemInfo = TamrielTradeCentre_ItemInfo:New(itemLink)
 	local pricing = TamrielTradeCentrePrice:GetPriceInfo(itemInfo)
 
-	d(itemInfo)
 
 	if pricing == nil then
 		pricing = {}
@@ -20,30 +23,25 @@ local function GenerateTipContent(itemLink)
 		suggested = suggestedMin .. " to " .. suggestedMax
 	end
 
-	local range = ""
-	if pricing.Avg ~= nil then
-		local priceMin = TamrielTradeCentre:FormatNumber(pricing.Min, 0) .. GOLD_ICON
-		local priceMax = TamrielTradeCentre:FormatNumber(pricing.Max, 0) .. GOLD_ICON
+	local listingsNote = "No historical data available"
+	if pricing.EntryCount ~= nil and pricing.Avg ~= nill then
+		local listings = TamrielTradeCentre:FormatNumber(pricing.EntryCount, 0)
 		local priceAvg = TamrielTradeCentre:FormatNumber(pricing.Avg, 0) .. GOLD_ICON
 
-		range = "Listings from " .. priceMin .. " to " .. priceMax
-		
-		pricing.Min = priceMin
-		pricing.Avg = priceAvg
-		pricing.Max = priceMax
+		listingsNote = listings .. " listings, averaging " .. priceAvg
 	end
 
-	local frequency = "No historical data available"
-	if pricing.EntryCount ~= nil then
-		local listings = TamrielTradeCentre:FormatNumber(pricing.EntryCount, 0)
+	local salesNote = "No historical data available"
+	if pricing.SaleEntryCount ~= nil and pricing.SaleAvg ~= nill then
+		local sales = TamrielTradeCentre:FormatNumber(pricing.SaleEntryCount, 0)
+		local saleAvg = TamrielTradeCentre:FormatNumber(pricing.SaleAvg, 0) .. GOLD_ICON
 
-		frequency = listings .. " listings, averaging " .. pricing.Avg .. "."
-
+		salesNote = sales .. " sales, averaging " .. saleAvg
 	end
 
 	pricing.Suggested = suggested
-	pricing.Range = range
-	pricing.Frequency = frequency
+	pricing.Sales = salesNote
+	pricing.Listings = listingsNote
 
 	return pricing
 end
@@ -57,24 +55,42 @@ local function AddData(tooltip, itemLink)
 
 	-- Generate our header and params
 	local headerParams = {
-		fontSize = 32
+		fontFace = "$(GAMEPAD_BOLD_FONT)",
+        fontSize = "$(GP_27)",
+        fontStyle = "soft-shadow-thick",
+        uppercase = true,
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+        height = 24,
 	}
 
 	-- Generate our tip content and params
 	local tipContent = GenerateTipContent(itemLink)
 	local tipParams = {
-		fontSize = 42,
-		fontColorField = GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_1
+		fontColorField = GENERAL_COLOR_WHITE,
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+        fontSize = "$(GP_34)"
 	}
+
+	local tipParams2 = {
+		fontColorField = GENERAL_COLOR_WHITE,
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+        fontSize = "$(GP_42)"
+	}
+
 
 	local FreqParams = {
-		fontSize = 36
+		fontSize = 27,
+		fontColorField = GENERAL_COLOR_WHITE
 	}
 
-	tooltip:AddLine("SUGGESTED PRICING, PER UNIT", headerParams, style)
-	tooltip:AddLine(tipContent.Suggested, tipParams, style)
-	tooltip:AddLine(tipContent.Frequency, FreqParams, style)
-	tooltip:AddLine(tipContent.Range, FreqParams, style)
+	tooltip:AddLine("SUGGESTED PRICING", headerParams, style)
+	tooltip:AddLine(tipContent.Suggested, tipParams2, style)
+	tooltip:AddLine("SALES & LISTINGS", headerParams, style)
+	tooltip:AddLine(tipContent.Sales, tipParams, style)
+	tooltip:AddLine(tipContent.Listings, tipParams, style)
+
+	tooltip:AddLine("Pricing is per unit.", FreqParams, style)
+
 end
 
 -- Integrates with the given tooltip panel.

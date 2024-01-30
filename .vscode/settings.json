@@ -1,13 +1,16 @@
 {
     "Lua.diagnostics.globals": [
+        "TamrielTradeCentre",
         "TamrielTradeCentre_ItemInfo",
         "TamrielTradeCentrePrice",
         "GetEventManager",
-        "TamrielTradeCentre",
-        "GAMEPAD_TOOLTIPS",
+        "EVENT_ADD_ON_LOADED",
         "GAMEPAD_LEFT_TOOLTIP",
         "GAMEPAD_RIGHT_TOOLTIP",
         "GAMEPAD_MOVABLE_TOOLTIP",
-        "GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_1"
+        "GAMEPAD_TOOLTIPS",
+        "GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_1",
+        "GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_2",
+        "GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_3"
     ]
 }

@@ -1,173 +1,198 @@
 
-GOLD_ICON = "|t32:32:esoui/art/currency/gamepad/gp_gold.dds|t"
+-- generates the pricing content
+local function GeneratePricingContent(itemLink, stackCount)
+	local pricing = TamrielTradeCentrePrice:GetPriceInfo(itemLink)
 
-local GENERAL_COLOR_WHITE = GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_1
-local GENERAL_COLOR_GREY = GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_2
-local GENERAL_COLOR_OFF_WHITE = GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_3
+	-- normalise the data
+	pricing = pricing or {}
+	pricing.SuggestedPrice = pricing.SuggestedPrice or 0
+	pricing.EntryCount = pricing.EntryCount or 0
+	pricing.Avg = pricing.Avg or 0
+	pricing.SaleAvg = pricing.SaleAvg or 0
+	pricing.SaleEntryCount = pricing.SaleEntryCount or 0
 
+	local content = {
+		unit = {
+			hasData = pricing.SuggestedPrice > 0,
+			low = pricing.SuggestedPrice,
+			high = pricing.SuggestedPrice * PadMerchant.Settings.SuggestionMultiplier,
+			statement = PadMerchant.Strings.NO_SUGGESTIONS_AVAILABLE
+		},
+		stack = {
+			hasData = pricing.SuggestedPrice > 0 and stackCount > 1,
+			count = stackCount,
+			low = pricing.SuggestedPrice * stackCount,
+			high = (pricing.SuggestedPrice * PadMerchant.Settings.SuggestionMultiplier) * stackCount,
+			statement = ""
+		},
+		listings = {
+			hasData = pricing.EntryCount > 0 and pricing.Avg > 0,
+			avg = pricing.Avg,
+			count = pricing.EntryCount,
+			statement = PadMerchant.Strings.NO_LISTINGS_SEEN
+		},
+		sales = {
+			hasData = pricing.SaleEntryCount > 0 and pricing.SaleAvg > 0,
+			count = pricing.SaleEntryCount,
+			avg = pricing.SaleAvg,
+			statement = PadMerchant.Strings.NO_SALES_SEEN
+		}
+	}
 
-local function GenerateTipContent(itemLink, stackCount)
-	local itemInfo = TamrielTradeCentre_ItemInfo:New(itemLink)
-	local pricing = TamrielTradeCentrePrice:GetPriceInfo(itemInfo)
+	if content.unit.hasData then
+		local unitMin = PadMerchant.Utils.FormatNumber(content.unit.low, true)
+		local unitMax = PadMerchant.Utils.FormatNumber(content.unit.high, true)
 
-	if pricing == nil then
-		pricing = {}
+		content.unit.statement = unitMin .. PadMerchant.Strings.TO .. unitMax
+
+		local stackMin = PadMerchant.Utils.FormatNumber(content.stack.low, true)
+		local stackdMax = PadMerchant.Utils.FormatNumber(content.stack.high, true)
+
+		content.stack.statement = stackMin .. PadMerchant.Strings.TO .. stackdMax
 	end
 
-	local itemSuggestion = ""
-	local stackSuggestion = ""
-	if pricing.SuggestedPrice ~= nil then
-		local suggestedMin = TamrielTradeCentre:FormatNumber(pricing.SuggestedPrice, 0) .. GOLD_ICON
-		local suggestedMax = TamrielTradeCentre:FormatNumber(pricing.SuggestedPrice * 1.25, 0) .. GOLD_ICON
+	if content.listings.hasData then
+		local listings = PadMerchant.Utils.FormatNumber(content.listings.count)
+		local listingsAvg = PadMerchant.Utils.FormatNumber(content.listings.avg, true)
 
-		local stackMin = TamrielTradeCentre:FormatNumber(pricing.SuggestedPrice * stackCount, 0) .. GOLD_ICON
-		local stackdMax = TamrielTradeCentre:FormatNumber((pricing.SuggestedPrice * 1.25) * stackCount, 0) .. GOLD_ICON
-
-		itemSuggestion = suggestedMin .. " to " .. suggestedMax
-		stackSuggestion = stackMin .. " to " .. stackdMax
+		content.listings.statement = listings  .. PadMerchant.Strings.LISTINGS_AVG .. listingsAvg
 	end
 
-	local listingsNote = "No listing data seen"
-	if pricing.EntryCount ~= nil and pricing.Avg ~= nill then
-		local listings = TamrielTradeCentre:FormatNumber(pricing.EntryCount, 0)
-		local priceAvg = TamrielTradeCentre:FormatNumber(pricing.Avg, 0) .. GOLD_ICON
+	if content.sales.hasData then
+		local sales = PadMerchant.Utils.FormatNumber(content.sales.count)
+		local saleAvg = PadMerchant.Utils.FormatNumber(content.sales.avg, true)
 
-		listingsNote = listings .. " listings, averaging " .. priceAvg
+		content.sales.statement = sales .. PadMerchant.Strings.SALES_AVG .. saleAvg
 	end
 
-	local salesNote = "No sales data seen"
-	if pricing.SaleEntryCount ~= nil and pricing.SaleAvg ~= nill then
-		local sales = TamrielTradeCentre:FormatNumber(pricing.SaleEntryCount, 0)
-		local saleAvg = TamrielTradeCentre:FormatNumber(pricing.SaleAvg, 0) .. GOLD_ICON
-
-		salesNote = sales .. " sales, averaging " .. saleAvg
-	end
-
-	pricing.ItemSuggestion = itemSuggestion
-	pricing.StackSuggestion = stackSuggestion
-	pricing.Sales = salesNote
-	pricing.Listings = listingsNote
-	pricing.StackSize = stackCount
-
-	
-
-	return pricing
+	return content
 end
 
--- Adds sales data from MasterMerchant data about to the provided
-local function AddData(tooltip, itemLink, stackCount)
-	if itemLink == nil then return end
+-- Adds the pricing content to the tooltip provided
+local function LayoutPricingContent(tooltip, content)
 
-	-- Generate our tip content and params
-	local tipContent = GenerateTipContent(itemLink, stackCount)
-
-	-- Our style is common to both header and tip
-	local style = tooltip:GetStyle("bodySection")
-
-	-- Generate our header and params
-	local headerParams = {
-		fontFace = "$(GAMEPAD_BOLD_FONT)",
-        fontSize = "$(GP_27)",
-        fontStyle = "soft-shadow-thick",
-        uppercase = true,
-        fontColorField = GENERAL_COLOR_OFF_WHITE,
-        height = 24,
+	-- Additional specific style params
+	local styles = {
+		baseStyle = tooltip:GetStyle("bodySection"),
+		header = {
+			fontColorField = PadMerchant.Colors.OFF_WHITE,
+			fontFace = PadMerchant.FontFaces.BOLD,
+			fontSize = PadMerchant.FontSizes.SMALL,
+			fontStyle = PadMerchant.FontStyles.SOFT_SHADOW_THICK,
+			height = 24,
+			uppercase = true
+		},
+		infoLine = {
+			fontColorField = PadMerchant.Colors.WHITE,
+			fontFace = PadMerchant.FontFaces.LIGHT,
+			fontSize = PadMerchant.FontSizes.MEDIUM,
+			height = 12
+		},
+		suggestion = {
+			fontColorField = PadMerchant.Colors.WHITE,
+			fontFace = PadMerchant.FontFaces.MEDIUM,
+			fontSize = PadMerchant.FontSizes.LARGE
+		},
+		suggestionHeader = {
+			fontColorField = PadMerchant.Colors.GREY,
+			fontFace = PadMerchant.FontFaces.MEDIUM,
+			fontSize = PadMerchant.FontSizes.TINY,
+			height = 6,
+			uppercase = true
+		}
 	}
 
+	-- We always show our header if we made it this far
+	tooltip:AddLine(PadMerchant.Strings.SUGGESTED_PRICING, styles.header, styles.baseStyle)
 
-	local tipParams = {
-		fontColorField = GENERAL_COLOR_WHITE,
-        fontFace = "$(GAMEPAD_LIGHT_FONT)",
-        fontSize = "$(GP_34)",
-		height = 12
-	}
-
-	local tipParams2 = {
-		fontColorField = GENERAL_COLOR_WHITE,
-        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
-        fontSize = 38
-	}
-
-
-	local FreqParams = {
-		fontSize = 22,
-		uppercase = true,
-		height = 6,
-		fontColorField = GENERAL_COLOR_GREY,
-		fontFace = "$(GAMEPAD_MEDIUM_FONT)",
-	}
-
-	tooltip:AddLine("SUGGESTED PRICING", headerParams, style)
-	if tipContent.ItemSuggestion ~= "" then
-		if tipContent.StackSize ~= 1 then
-			tooltip:AddLine("this stack of " .. tipContent.StackSize, FreqParams, style)
-			tooltip:AddLine(tipContent.StackSuggestion, tipParams2, style)	
+	-- Show our suggestion only if we have one
+	if content.item.hasData then
+		if content.stack.hasData then
+			tooltip:AddLine(PadMerchant.Strings.THIS_STACK_OF .. content.stack.size, styles.suggestionHeader, styles.baseStyle)
+			tooltip:AddLine(content.stack.statement, styles.suggestion, styles.baseStyle)
 		end
 
-		tooltip:AddLine("per unit", FreqParams, style)
-		tooltip:AddLine(tipContent.ItemSuggestion, tipParams2, style)
+		tooltip:AddLine(PadMerchant.Strings.PER_UNIT, styles.suggestionHeader, styles.baseStyle)
+		tooltip:AddLine(content.unit.statement, styles.suggestion, styles.baseStyle)
 	else
-		tooltip:AddLine("No suggestions available", tipParams2, style)
+		tooltip:AddLine(content.unit.statement, styles.suggestion, styles.baseStyle)
 	end
 
-	tooltip:AddLine(tipContent.Sales, tipParams, style)
-	tooltip:AddLine(tipContent.Listings, tipParams, style)
-	tooltip:AddLine("", tipParams, style)
+	tooltip:AddLine(content.sales.statement, styles.infoLine, styles.baseStyle)
+	tooltip:AddLine(content.listings.statement, styles.infoLine, styles.baseStyle)
+
+	-- Adds a bit of breathing space below our content without messing with padding, 
+	-- etc. Fixes "Seller Name" spacing when in the tradehouse for instance.
+	tooltip:AddLine("", styles.infoLine, styles.baseStyle)
 end
 
 -- Integrates with the given tooltip panel.
-local function IntegrateWith(tooltip)
-	local method = "LayoutItem"
+local function ExtendToolTipMethod(tooltip, method)
 	local original = tooltip[method]
 
-	-- The wrapper will call the old method first, we will add our data at the bottom of 
-	-- the list. The original method returns a context that needs to be returned by the 
-	-- wrapper. If this is not returned 'equipped' windows will break see (#3).
-	local function Wrapper(self, itemLink, aa,bb,cc,dd,itemName, ...)
-		local context = original(self, itemLink, aa,bb,cc,dd,itemName, ...)
-		local stackCount = 1
+	local function Wrapper(self, ...)
 
-		if itemName ~= nil then
-			stackCount = string.match(itemName,"%((%d+)%)")
+		-- Run the original method and grab it's return.
+		local returnResult = original(self, ...)
 
+		-- Get the item Link and Name without having to list all the
+		-- uneeded params. Note, args does not contain any named params.
+		local itemLink = arg[1]
+		local itemName = arg[6]
+
+		-- Only run our custom code if we have a itemLink. BWe are generically wrapping all calls to LayoutItem, so we 
+		-- need to handle cases when what is shown in any of the tooltip panels is not an item (LevelUp Rewards for instance).
+		if itemLink ~= nil or itemLink ~= "" then
+
+			-- normalise so match doesn't crash on match.
+			if itemName == nil then
+				itemName = ""
+			end
+
+			-- Having tested a bunch of ways to get the stack count for the itemLink in question, it seems
+			-- it is easiest to test if it is in the name (eg. "Some Item (43)") or not. The beauty of doing
+			-- it this way is the number is always contextually correct for the item in question. If we queried
+			-- the counts we would have to test what context we are in for the tooltip to know which total to use.
+			local stackCount = string.match(itemName,"%((%d+)%)")
+
+			-- If we don't get, or can't parse a stackCount we set it to 
+			-- 1 as that will ensure we get no stack calculation issues
 			if stackCount == nil then
 				stackCount = 1
-			end	
+			end
+
+			-- Add our content now that we know we are dealing with an item.
+			local content = GeneratePricingContent(itemLink, stackCount)
+			LayoutPricingContent(self, content)
 		end
 
-		AddData(self, itemLink, stackCount)
-
-		return context
+		-- be good citizings and return the original's methods return values (if any)
+		return returnResult
 	end
 
+	-- add our wrapper method in place of the original method. Our wrapper will be called every time
+	-- that ToolTip.LayoutItem is called on the supplied tooltip.
 	tooltip[method] = Wrapper
 end
 
--- Public method to run the tooltip integration.
+-- Public method to run the tooltip integration. The integration simply overrides a method named
+-- LayoutItem on the two panels of the Gamepad Mode UI that act as ToolTips.
 function PadMerchant.ToolTips.Setup()
+
+	-- In Gamepad Mode there are really only two locations we care about. These are the left
+	-- panel and right panels. In all cases for Gamepad Mode, from TradeHouse to Bag and Bank
+	-- an item's detail will be presented as a left or right panel, that acts as the tooltip.
 	local tooltips = {
 		left = GAMEPAD_TOOLTIPS:GetTooltip(GAMEPAD_LEFT_TOOLTIP),
-		right = GAMEPAD_TOOLTIPS:GetTooltip(GAMEPAD_RIGHT_TOOLTIP),
-		movable = GAMEPAD_TOOLTIPS:GetTooltip(GAMEPAD_MOVABLE_TOOLTIP)
+		right = GAMEPAD_TOOLTIPS:GetTooltip(GAMEPAD_RIGHT_TOOLTIP)
 	}
 
-	-- Hook into the inventory call so we can add our data 
-	-- along with the orignal data that was in the tooltip
-	IntegrateWith(tooltips.left)
-	IntegrateWith(tooltips.right)
-	IntegrateWith(tooltips.movable)
+	-- We only care about the lowest level LayoutItem method on each panel described above. In the ESOUI code
+	-- all of the Layout* methods ultimately call down to this base function. This lets us handle any particular
+	-- type of tooltip without needing to override all the differing Layout* functions.
+	ExtendToolTipMethod(tooltips.Left, "LayoutItem")
+	ExtendToolTipMethod(tooltips.Right, "LayoutItem")
+
+	-- Store a reference to the tooltips in case we need to do something with them later.
+	PadMerchant.ToolTips = tooltips
 end
-
---[[ Globals Used & Explainations:
-
-GAMEPAD_TOOLTIPS:GetTooltip(GAMEPAD_XYZ_TOOLTIP)
-	In gamepad mode the windows to the left and right are considered tooltips to
-	the UI. We use the GetTooltip function of the GAMEPAD_TOOLTIPS global to get
-	a reference to each of the three known tooltip windows.
-
-GAMEPAD_TOOLTIP_COLOR_X_Y
-	All colors in ESOUI are exported as globals and can be found either in the source
-	code or on the ESOUI wiki at http://wiki.esoui.com/Globals. Use Ctrl+F and search 
-	GamepadTooltipColors to find the complete list for the gamepad ui.
-
-]]

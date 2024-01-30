@@ -5,8 +5,56 @@
 PadMerchant = {
 	name = "PadMerchant",
 	version = "2.0",
-	ToolTips = {}
+	ToolTips = {},
+	Utils = {},
+	Settings = {
+		SuggestionMultiplier = 1.25
+	},
+	FontFaces = {
+		MEDIUM = "$(GAMEPAD_BOLD_FONT)",
+		BOLD = "$(GAMEPAD_BOLD_FONT)",
+		LIGHT = "$(GAMEPAD_LIGHT_FONT)"
+	},
+	FontSizes = {
+		TINY = "$(GP_22)",
+		SMALL = "$(GP_27)",
+		MEDIUM = "$(GP_34)",
+		LARGE = "$(GP_36)"
+
+	},
+	FontStyles = {
+		SOFT_SHADOW_THICK = "soft-shadow-thick"
+	},
+	Colors = {
+		WHITE = GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_1,
+		GREY = GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_2,
+		OFF_WHITE = GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_3
+	},
+	Icons = {
+		GOLD_WHITE = "|t32:32:esoui/art/currency/gamepad/gp_gold.dds|t"
+	},
+	Strings = {
+		SUGGESTED_PRICING = "SUGGESTED PRICING",
+		THIS_STACK_OF = "this stack of ",
+		PER_UNIT = "per unit",
+		TO = " to ",
+		NO_LISTINGS_SEEN = "No listing data seen",
+		NO_SALES_SEEN = "No sales data seen",
+		LISTINGS_AVG = " listings, averaging ",
+		SALES_AVG = " sales, averaging ",
+		NO_SUGGESTIONS_AVAILABLE = "No suggestions available"
+	}
 }
+
+function PadMerchant.Utils.FormatNumber(number, addIcon)
+	local result = TamrielTradeCentre:FormatNumber(number, 0)
+	
+	if addIcon then
+		result = result .. PadMerchant.Icons.GOLD_WHITE
+	end
+	
+	return result
+end
 
 -- Our addons Initialize event. This will be 
 -- called once per EVENT_ADD_ON_LOADED event.

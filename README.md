@@ -1,7 +1,7 @@
 # PadMerchant
 > an Elder Scrolls Online addon
 
-PadMerchant is a wrapper addon for ESO and MasterMerchant. It allows MasterMerchant's data to be displayed on the ESO Gamepad UI.
+PadMerchant is a wrapper addon for ESO and Tamriel Trade Centre. It allows Tamriel Trade Centre's data to be displayed on the ESO Gamepad UI.
 
 ## Usage
 PadMerchant can be installed manually from Github or via [ESOUI][1] or their [Minion Addon Manager][2].
@@ -37,13 +37,11 @@ To install from Minion,
 4. Hit the install button
 
 ## Acknowledgments
-- __BUI__: For the inital [patch code][1].
 - __ESO Community__: For helping me figure out where to find the resources I needed.
 
 ## License
-Copyright Dean McDonnell 2017, Licensed under [MIT](./LICENSE).
+Copyright Dean McDonnell 2024, Licensed under [MIT](./LICENSE).
 
 [1]: http://esoui.com
 [2]: http://minion.mmoui.com
 [3]: https://github.com/mcdonnelldean/eso-pad-merchant/releases
-[4]: http://www.esoui.com/downloads/info1297-FixMasterMerchantGamepadPatch.html

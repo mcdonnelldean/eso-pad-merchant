@@ -5,12 +5,13 @@ local function GeneratePricingContent(itemLink, stackCount)
 
 	-- normalise the data
 	pricing = pricing or {}
-	pricing.SuggestedPrice = pricing.SuggestedPrice or 0
-	pricing.EntryCount = pricing.EntryCount or 0
-	pricing.Avg = pricing.Avg or 0
-	pricing.SaleAvg = pricing.SaleAvg or 0
-	pricing.SaleEntryCount = pricing.SaleEntryCount or 0
+	pricing.SuggestedPrice = tonumber(pricing.SuggestedPrice) or 0
+	pricing.EntryCount = tonumber(pricing.EntryCount) or 0
+	pricing.Avg = tonumber(pricing.Avg) or 0
+	pricing.SaleAvg = tonumber(pricing.SaleAvg) or 0
+	pricing.SaleEntryCount = tonumber(pricing.SaleEntryCount) or 0
 
+	-- Create the content packet
 	local content = {
 		unit = {
 			hasData = pricing.SuggestedPrice > 0,
@@ -39,6 +40,7 @@ local function GeneratePricingContent(itemLink, stackCount)
 		}
 	}
 
+	-- Add unit and stack suggestions
 	if content.unit.hasData then
 		local unitMin = PadMerchant.Utils.FormatNumber(content.unit.low, true)
 		local unitMax = PadMerchant.Utils.FormatNumber(content.unit.high, true)
@@ -51,6 +53,7 @@ local function GeneratePricingContent(itemLink, stackCount)
 		content.stack.statement = stackMin .. PadMerchant.Strings.TO .. stackdMax
 	end
 
+	-- Add listing statement
 	if content.listings.hasData then
 		local listings = PadMerchant.Utils.FormatNumber(content.listings.count)
 		local listingsAvg = PadMerchant.Utils.FormatNumber(content.listings.avg, true)
@@ -58,6 +61,7 @@ local function GeneratePricingContent(itemLink, stackCount)
 		content.listings.statement = listings  .. PadMerchant.Strings.LISTINGS_AVG .. listingsAvg
 	end
 
+	-- Add sales statement
 	if content.sales.hasData then
 		local sales = PadMerchant.Utils.FormatNumber(content.sales.count)
 		local saleAvg = PadMerchant.Utils.FormatNumber(content.sales.avg, true)
@@ -85,13 +89,13 @@ local function LayoutPricingContent(tooltip, content)
 		infoLine = {
 			fontColorField = PadMerchant.Colors.WHITE,
 			fontFace = PadMerchant.FontFaces.LIGHT,
-			fontSize = PadMerchant.FontSizes.MEDIUM,
+			fontSize = PadMerchant.FontSizes.LARGE,
 			height = 12
 		},
 		suggestion = {
 			fontColorField = PadMerchant.Colors.WHITE,
-			fontFace = PadMerchant.FontFaces.MEDIUM,
-			fontSize = PadMerchant.FontSizes.LARGE
+			fontFace = PadMerchant.FontFaces.LIGHT,
+			fontSize = PadMerchant.FontSizes.XLARGE
 		},
 		suggestionHeader = {
 			fontColorField = PadMerchant.Colors.GREY,
@@ -106,9 +110,9 @@ local function LayoutPricingContent(tooltip, content)
 	tooltip:AddLine(PadMerchant.Strings.SUGGESTED_PRICING, styles.header, styles.baseStyle)
 
 	-- Show our suggestion only if we have one
-	if content.item.hasData then
+	if content.unit.hasData then
 		if content.stack.hasData then
-			tooltip:AddLine(PadMerchant.Strings.THIS_STACK_OF .. content.stack.size, styles.suggestionHeader, styles.baseStyle)
+			tooltip:AddLine(PadMerchant.Strings.THIS_STACK_OF .. content.stack.count, styles.suggestionHeader, styles.baseStyle)
 			tooltip:AddLine(content.stack.statement, styles.suggestion, styles.baseStyle)
 		end
 
@@ -137,8 +141,9 @@ local function ExtendToolTipMethod(tooltip, method)
 
 		-- Get the item Link and Name without having to list all the
 		-- uneeded params. Note, args does not contain any named params.
-		local itemLink = arg[1]
-		local itemName = arg[6]
+		local args = {...} or {}
+		local itemLink = args[1]
+		local itemName = args[6]
 
 		-- Only run our custom code if we have a itemLink. BWe are generically wrapping all calls to LayoutItem, so we 
 		-- need to handle cases when what is shown in any of the tooltip panels is not an item (LevelUp Rewards for instance).
@@ -153,13 +158,7 @@ local function ExtendToolTipMethod(tooltip, method)
 			-- it is easiest to test if it is in the name (eg. "Some Item (43)") or not. The beauty of doing
 			-- it this way is the number is always contextually correct for the item in question. If we queried
 			-- the counts we would have to test what context we are in for the tooltip to know which total to use.
-			local stackCount = string.match(itemName,"%((%d+)%)")
-
-			-- If we don't get, or can't parse a stackCount we set it to 
-			-- 1 as that will ensure we get no stack calculation issues
-			if stackCount == nil then
-				stackCount = 1
-			end
+			local stackCount = tonumber(string.match(itemName,"%((%d+)%)")) or 1
 
 			-- Add our content now that we know we are dealing with an item.
 			local content = GeneratePricingContent(itemLink, stackCount)
@@ -190,8 +189,8 @@ function PadMerchant.ToolTips.Setup()
 	-- We only care about the lowest level LayoutItem method on each panel described above. In the ESOUI code
 	-- all of the Layout* methods ultimately call down to this base function. This lets us handle any particular
 	-- type of tooltip without needing to override all the differing Layout* functions.
-	ExtendToolTipMethod(tooltips.Left, "LayoutItem")
-	ExtendToolTipMethod(tooltips.Right, "LayoutItem")
+	ExtendToolTipMethod(tooltips.left, "LayoutItem")
+	ExtendToolTipMethod(tooltips.right, "LayoutItem")
 
 	-- Store a reference to the tooltips in case we need to do something with them later.
 	PadMerchant.ToolTips = tooltips

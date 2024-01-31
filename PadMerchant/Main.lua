@@ -19,7 +19,8 @@ PadMerchant = {
 		TINY = "$(GP_22)",
 		SMALL = "$(GP_27)",
 		MEDIUM = "$(GP_34)",
-		LARGE = "$(GP_36)"
+		LARGE = "$(GP_36)",
+		XLARGE = "$(GP_42)"
 
 	},
 	FontStyles = {
